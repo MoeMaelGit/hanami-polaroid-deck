@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Hanami Polaroid — Technical Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sumi:#14161a; --sumi-2:#1b1e24; --washi:#ece6da; --washi-dim:#9a958c;
+    --sakura:#e8a0b4; --hud:#e0a96d; --matcha:#7f9b78; --line:#2c313a;
+    --serif:"Shippori Mincho","Yu Mincho",Georgia,serif;
+    --sans:"Inter",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--sumi);color:var(--washi);font-family:var(--sans);font-weight:300;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--sakura);width:0;z-index:50}
+
+  .wrap{max-width:820px;margin:0 auto;padding:0 28px 120px}
+
+  /* masthead */
+  header.top{padding:74px 0 30px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--sakura);margin-bottom:18px}
+  .jp{font-family:var(--serif);color:var(--sakura);font-size:20px;letter-spacing:.28em;font-weight:600;margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:800;font-size:clamp(38px,6.5vw,64px);line-height:1.04;letter-spacing:-.01em}
+  .sub{font-size:clamp(16px,2vw,19px);color:var(--washi-dim);margin-top:18px;max-width:60ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0 22px;font-family:var(--mono);font-size:12px;color:var(--washi-dim);
+    letter-spacing:.06em;margin-top:24px}
+  .meta span{padding-right:22px;border-right:1px solid var(--line)}
+  .meta span:last-child{border:0;padding-right:0}
+  .meta a{color:var(--sakura);text-decoration:none;border-bottom:1px solid rgba(232,160,180,.4)}
+  .meta a:hover{color:var(--washi)}
+
+  /* sections */
+  section{padding-top:52px;scroll-margin-top:20px}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3.4vw,34px);line-height:1.12;
+    margin-bottom:20px;display:flex;gap:16px;align-items:baseline}
+  h2 .n{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--hud);flex:0 0 auto}
+  h3{font-family:var(--serif);font-weight:600;font-size:20px;margin:28px 0 8px}
+  p{margin:0 0 16px;color:#d8d2c6}
+  strong{color:var(--washi);font-weight:600}
+  em{color:var(--washi)}
+  .accent{color:var(--sakura)}
+  .lead{font-size:18px;color:var(--washi)}
+  a.inline{color:var(--sakura)}
+
+  ul{list-style:none;margin:8px 0 18px}
+  ul li{position:relative;padding-left:22px;margin-bottom:11px;color:#d8d2c6}
+  ul li::before{content:"";position:absolute;left:0;top:10px;width:6px;height:6px;background:var(--sakura);transform:rotate(45deg)}
+
+  code{font-family:var(--mono);font-size:.86em;color:var(--hud);background:#0f1115;
+    padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+  .formula{font-family:var(--mono);background:#0f1115;border:1px solid var(--line);border-radius:8px;
+    padding:14px 18px;color:var(--hud);font-size:14px;margin:6px 0 18px;overflow-x:auto}
+  .tree{font-family:var(--mono);background:#0f1115;border:1px solid var(--line);border-radius:10px;
+    padding:20px 22px;font-size:13px;line-height:1.85;white-space:pre;color:var(--washi);overflow-x:auto;margin:6px 0 20px}
+  .tree .a{color:var(--sakura)}.tree .h{color:var(--hud)}.tree .d{color:var(--washi-dim)}
+
+  table{width:100%;border-collapse:collapse;margin:10px 0 22px;font-size:15px}
+  table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:#d8d2c6}
+  table td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--hud);letter-spacing:.04em;
+    white-space:nowrap;width:200px}
+  table tr:last-child td{border-bottom:0}
+
+  .fix{display:grid;grid-template-columns:30px 1fr;gap:14px;background:var(--sumi-2);border:1px solid var(--line);
+    border-left:3px solid var(--sakura);border-radius:8px;padding:15px 18px;margin-bottom:13px}
+  .fix .num{font-family:var(--mono);color:var(--sakura);font-size:14px;font-weight:600}
+  .fix h4{font-size:16px;font-weight:600;margin-bottom:5px;font-family:var(--sans)}
+  .fix p{font-size:14.5px;margin:0;color:var(--washi-dim)}
+  .fix code{font-size:13px}
+
+  footer{margin-top:70px;padding-top:26px;border-top:1px solid var(--line);font-family:var(--mono);
+    font-size:12px;color:var(--washi-dim);letter-spacing:.06em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  footer a{color:var(--sakura);text-decoration:none}
+
+  @media (max-width:620px){ table td:first-child{width:auto;display:block} h2{flex-direction:column;gap:4px} }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker">Technical Report</div>
+  <div class="jp">花見 ポラロイド</div>
+  <h1>Hanami Polaroid</h1>
+  <p class="sub">A standalone VR photography experience for Meta Quest. A technical account of the camera system, the VR-specific rendering and comfort work, and the performance budget.</p>
+  <div class="meta">
+    <span>XR Class &amp; Design · Carulli</span>
+    <span>Unity 6 · URP · OpenXR</span>
+    <span>Meta Quest 2 / 3</span>
+    <span><a href="index.html">View the presentation →</a></span>
+  </div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">01</span> Executive summary</h2>
+  <p class="lead">Hanami Polaroid is a walking VR experience for the Meta Quest in which the player strolls a Japanese garden during <em>hanami</em> (cherry-blossom season) and takes photographs with a fully simulated digital camera.</p>
+  <p>Photos are captured through a live, in-headset viewfinder with real photographic controls (zoom, focus, aperture, depth of field), then eject as physical polaroids that the player shakes to develop and hangs on a clothesline strung between the garden's torii gates. The camera can be mounted on a tripod for stable, aimed framing, and the player roams multiple photo spots in a free-roam loop introduced by a guided tutorial.</p>
+  <p>The technical core is a <strong>camera-within-a-camera rendering system</strong>: a secondary scene camera renders the framed view into a render texture displayed on a world-space LCD, with a physically based depth-of-field stage applied only to that texture, never to the player's eyes. Most of the engineering effort went into making this read correctly and comfortably <strong>in stereo VR</strong> on a <strong>mobile GPU budget</strong>. The full gameplay loop is complete and verified in-headset on a Meta Quest 3; what remains is a dedicated performance pass and the final on-device build at the 72/90 FPS target.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span> Concept and design goals</h2>
+  <table>
+    <tr><td>CALM TONE</td><td>Hanami is about slow appreciation, so the loop rewards looking and framing rather than speed.</td></tr>
+    <tr><td>A REAL CAMERA</td><td>Diegetic controls (a viewfinder you look through, physical zoom/focus/aperture) make the act of photography the gameplay, rather than an abstract UI.</td></tr>
+    <tr><td>TANGIBLE PHOTOS</td><td>Photos are physical objects you hold, shake, drop, and hang, turning each shot into a keepsake and a spatial memory.</td></tr>
+    <tr><td>COMFORT FIRST</td><td>VR comfort (no nausea, no stereo conflicts, no unwanted locomotion) was a hard requirement, not a polish item.</td></tr>
+    <tr><td>RUNS ON QUEST</td><td>Everything is budgeted for a mobile tile-based GPU: forward rendering, aggressive culling, one cheap secondary render target.</td></tr>
+  </table>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span> Target platform and technology stack</h2>
+  <table>
+    <tr><td>ENGINE</td><td>Unity 6 (6000.4.3f1)</td></tr>
+    <tr><td>RENDER PIPELINE</td><td>URP 17.4.0, Forward (not Forward+, for the mobile tile GPU), Linear color space</td></tr>
+    <tr><td>XR RUNTIME</td><td>OpenXR 1.13.0 + Meta OpenXR 2.0.0</td></tr>
+    <tr><td>INTERACTION</td><td>XR Interaction Toolkit 3.0.7 (Starter Assets rig)</td></tr>
+    <tr><td>STEREO MODE</td><td>Single Pass Instanced</td></tr>
+    <tr><td>GRAPHICS API</td><td>Vulkan only (OpenGLES3 removed)</td></tr>
+    <tr><td>SCRIPTING</td><td>IL2CPP, ARM64, Min Android API 29</td></tr>
+    <tr><td>TARGET</td><td>Quest 2 (72 FPS) / Quest 3 (90 FPS), controllers only</td></tr>
+  </table>
+  <p>The vendor garden and the camera model are URP-native, so there were zero render-pipeline conversion conflicts for the environment; only a handful of Standard-shader materials on the camera model needed re-authoring to URP/Lit.</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span> System architecture</h2>
+  <p>All custom gameplay code lives in <code>Assets/Scripts/Camera/</code> under the namespace <code>XRCD.CameraSystem</code>. The system is deliberately component-based and event-driven rather than one monolithic manager, so each subsystem can be tested and tuned in isolation.</p>
+  <div class="tree"><span class="h">Player ▸ XR Origin rig</span>
+├─ <span class="a">HanamiCamera</span> <span class="d">(grabbable)</span>
+│   ├─ VirtualCamera ─▶ RT_Viewfinder <span class="d">(1024×768)</span>
+│   ├─ on-body LCD <span class="d">(samples the RT)</span>
+│   ├─ ViewfinderRenderer <span class="d">(on only while held)</span>
+│   └─ DirectGrabOnlyFilter <span class="d">(reach-grab only)</span>
+├─ <span class="a">TripodZoneController</span> <span class="d">rings · mount · phases</span>
+│   ├─ ZoneRing × N <span class="d">(terrain-conforming)</span>
+│   └─ HanamiTripod ▸ CameraMountPoint
+├─ <span class="a">CameraViewController</span> <span class="d">viewfinder + controls</span>
+│   └─ ViewfinderVolume <span class="d">(DoF, layer 8 only)</span>
+├─ PolaroidPrinter ▸ Polaroid ▸ Develop
+├─ PhotoGallery · TutorialGuide
+└─ TeleportRayDisabler</div>
+  <h3>Key architectural decisions</h3>
+  <ul>
+    <li><strong>Layer-based isolation (ViewfinderUI, layer 8).</strong> Every surface that displays the feed (the on-body LCD, the world-space viewfinder canvas, the zone rings) lives on layer 8, which the secondary camera's culling mask excludes. This single mechanism solves the infinite-mirror problem and keeps UI and rings out of captured photos.</li>
+    <li><strong>Depth of field as a per-target volume, not a global effect.</strong> The DoF volume is also on layer 8 and is only sampled by the secondary camera. The eye camera has post-processing off, so the player's actual view is never blurred, which is a critical comfort decision.</li>
+    <li><strong>Procedural, asset-free artefacts.</strong> Polaroids are generated entirely in code (mesh plus a runtime texture read from the render texture), so there is no dependency on an imported model and each card cleans up its own runtime resources on cull.</li>
+  </ul>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span> Feature breakdown</h2>
+
+  <h3>5.1 The camera and viewfinder</h3>
+  <p>A secondary Unity camera ("VirtualCamera") renders the framed scene <strong>monoscopically</strong> into <code>RT_Viewfinder</code> (1024×768, 4:3). Rendering mono, not stereo, into the texture was a deliberate VR fix: the framed photo is a flat image, not a stereo pair. The texture is shown on a world-space, rear-LCD-style canvas (dark bezel, live feed, and a readout of focal length, f-stop, and focus distance) plus a small on-body LCD on the camera back. The whole canvas is un-mirrored at the root (negated X scale) so text and image read correctly while facing the eyes.</p>
+
+  <h3>5.2 Photographic controls</h3>
+  <table>
+    <tr><td>ENTER / EXIT VIEW</td><td>B button. Toggles the immersive viewfinder; gated on proximity to a mounted camera.</td></tr>
+    <tr><td>AIM</td><td>Left stick. Yaw/pitch the mounted camera around its captured pivot; pose re-asserted every frame (no drift); pitch hard-clamped.</td></tr>
+    <tr><td>ZOOM</td><td>Right stick (Y). Secondary-camera FOV 60° to 12° (about 21 to 115 mm on a 24 mm full-frame sensor), smoothed.</td></tr>
+    <tr><td>FOCUS</td><td>Right stick (X). Logarithmic focus distance 0.5 to 200 m.</td></tr>
+    <tr><td>APERTURE</td><td>Left X / Y. Standard stops f/1.8 to f/22.</td></tr>
+    <tr><td>SHUTTER</td><td>Trigger. Captures the frame (white flash, synthesized shutter click, haptic).</td></tr>
+  </table>
+  <p>Crucially, zoom and depth of field are unified into one physical lens: the focal length used for the Bokeh blur is derived from the live FOV, so the blur magnitude is physically correct at every zoom step.</p>
+  <div class="formula">f = sensorHeight / (2 · tan(FOV / 2))   ·   sensorHeight = 24 mm (full-frame)</div>
+  <p>Right-stick zoom (Y) and focus (X) use dominant-axis gating, so a diagonal push never cross-talks.</p>
+
+  <h3>5.3 Depth of field and the focus indicator</h3>
+  <p>DoF uses URP's Bokeh model (blurs near and far, like a real lens) running only on the viewfinder texture. A focus indicator (a red-to-green dot plus a centre reticle) is computed from the physical depth of field via the hyperfocal distance, giving the player honest feedback about what is sharp. Capture is intentionally not gated on focus, so deliberately soft or artistic shots are allowed.</p>
+  <div class="formula">hyperfocal  H = f² / (N · c)   ·   N = f-number, c = circle of confusion</div>
+
+  <h3>5.4 Polaroid capture, ejection and development</h3>
+  <p>On the shutter, the secondary camera's render texture is read into a <code>Texture2D</code> and composited into a procedural card (4:3 photo, classic uneven bezel). The card ejects horizontally (camera-forward projected onto the ground plane) plus an up-pop, so it clears the tripod at any pitch, with a <code>ContinuousDynamic</code> Rigidbody to stop thin cards tunnelling through the terrain on slopes. Cards eject blank white and develop from 0 to 1 via a passive timer and by shaking (driven by card acceleration), fading a transparent-white overlay. A FIFO cap of 10 keeps the world and memory bounded; each culled card disposes its runtime texture and material.</p>
+
+  <h3>5.5 The clothesline photo gallery</h3>
+  <p>Catenary ropes (true sag curves) are strung between anchor pairs in the torii beams. Developed photos hang by their top-middle on a HingeJoint that keeps gravity but allows free swivel about Y, so they turn gently in place. Left trigger while holding a developed photo remote-stores it onto a free rope clip (or replaces the oldest, which drops); stored photos are exempt from the FIFO cull.</p>
+
+  <h3>5.6 Tripod</h3>
+  <p>The real AK Mini Tripod (scaled to about 1.5 m) carries a <code>CameraMountPoint</code> that auto-mounts the camera upright when released within range. It is implemented as an event-driven snap rather than an XRIT socket, to avoid conflicting with the direct-grab filter. <code>TripodHead</code> groups the tripod's upper cylinders under a runtime pan pivot so the head and handle physically pan with the camera as you aim.</p>
+
+  <h3>5.7 Guided tutorial and free-roam</h3>
+  <p><code>TutorialGuide</code> shows a head-locked panel whose prompts are derived from live game state, so they are always truthful (release the camera before reaching a ring and the prompt reverts). It walks the player through the entire loop to a first developed, hung photo, then opens free-roam across six rings around the garden; tripods spawn facing the central garden.</p>
+
+  <h3>5.8 Environment and terrain</h3>
+  <p>The vendor Waldemarst Japanese Garden was trimmed from a 7×7 grid to a 3×3 (9-tile) walkable area (about 180×180 m, around 9.5 m of relief) and stripped of roughly 25 million grass detail instances and wind, which was the single biggest Quest win. Distant scenery is restored with a panoramic HDRI skybox (借景 <em>shakkei</em>, "borrowed scenery") plus a ground skirt and linear fog, instead of expensive terrain geometry. A custom procedural terrain-ring populator sculpts the neighbour tiles to flow seamlessly out of the vendor garden using a three-term height formula (<code>h = sourceEdgeAnchor + rimElevation + zeroMeanNoise</code>) with inward-biased source sampling to kill the boundary seam.</p>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span> VR-specific rendering solutions</h2>
+  <p>These are the most technically interesting parts of the project. Each was a real bug discovered in-headset and traced to a root cause.</p>
+  <div class="fix"><div class="num">01</div><div><h4>Infinite-mirror recursion</h4><p>The viewfinder feed showed the on-body LCD, which itself shows the feed, causing runaway recursion. Fix: a dedicated <code>ViewfinderUI</code> layer excluded from the secondary camera's culling mask, so the camera films the garden, not the screens.</p></div></div>
+  <div class="fix"><div class="num">02</div><div><h4>Single Pass Instanced stereo bug (the "eye-strain" ring)</h4><p>The only hand-written shader, the neon zone ring, rendered in the left eye only, producing binocular rivalry and headaches. Built-in URP shaders handle this automatically; the custom one was missing the SPI stereo macros. Adding them made it render correctly in both eyes.</p></div></div>
+  <div class="fix"><div class="num">03</div><div><h4>Depth of field leaking onto the player's eyes</h4><p>DoF must blur the photo, never the player's vision (which would be instant nausea). Fix: an isolated post-processing volume on layer 8 sampled only by the secondary camera; the eye camera has post off.</p></div></div>
+  <div class="fix"><div class="num">04</div><div><h4>Teleport ray leak</h4><p>The Starter-Assets rig re-activates its teleport interactor whenever the right stick is pushed forward, the same stick used here for zoom, so a one-shot disable did not hold. Fix: <code>TeleportRayDisabler</code> re-asserts the teleport interactors inactive every frame before render, so the ray can never draw.</p></div></div>
+  <div class="fix"><div class="num">05</div><div><h4>Aim drift</h4><p>Naive stick-aim accumulated floating-point drift and could rotate the camera off its mount. Fix: the pose is re-derived each frame from a captured pivot (<code>currentRot · Inverse(Euler(pitch,yaw,0))</code>), keeping the pitch clamp absolute and the camera glued to the tripod.</p></div></div>
+  <div class="fix"><div class="num">06</div><div><h4>Mathf.SmoothStep is not GLSL smoothstep (terrain)</h4><p>Unity's <code>Mathf.SmoothStep(a,b,t)</code> interpolates between a and b; it is not a 0-to-1 edge transition. Assuming GLSL semantics produced nonsensical mountain heights. Fix: a custom <code>Smooth01(edge0, edge1, x)</code> helper with correct GLSL semantics.</p></div></div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">07</span> Interaction and comfort design</h2>
+  <ul>
+    <li><strong>Direct reach-grab only.</strong> A custom <code>IXRSelectFilter</code> (<code>DirectGrabOnlyFilter</code>) rejects far-ray grabs, so objects must be physically reached, which is more grounded and less error-prone in a calm experience.</li>
+    <li><strong>Locomotion is continuous move plus snap turn</strong>, with teleport deliberately disabled (and its ray suppressed). Snap turn rather than smooth turn reduces vection-induced discomfort.</li>
+    <li><strong>No forced motion, no screen-space effects on the eyes.</strong> All photographic post-processing is confined to the render texture.</li>
+    <li><strong>State-truthful tutorial</strong> avoids the classic VR frustration of prompts that do not match what the player is actually holding or doing.</li>
+  </ul>
+</section>
+
+<section id="s8">
+  <h2><span class="n">08</span> Performance strategy</h2>
+  <table>
+    <tr><td>DETAIL / GRASS</td><td>Removed roughly 25 million grass instances (the largest single win).</td></tr>
+    <tr><td>TERRAIN COUNT</td><td>49 tiles down to 9; splat VRAM 98 MB down to 18 MB.</td></tr>
+    <tr><td>DISTANT SCENERY</td><td>HDRI skybox plus ground skirt instead of geometry.</td></tr>
+    <tr><td>WIND / ANIMATION</td><td>Scene WindZone disabled (static SpeedTrees).</td></tr>
+    <tr><td>SECONDARY RENDER</td><td>One mono secondary RT at 1024×768; cheap, post isolated to its own DoF volume, never the eyes.</td></tr>
+    <tr><td>STEREO</td><td>Single Pass Instanced.</td></tr>
+    <tr><td>COLLIDERS</td><td>Tree trunks baked as cheap capsule colliders, not mesh colliders.</td></tr>
+    <tr><td>PIPELINE</td><td>URP Forward (not Forward+).</td></tr>
+  </table>
+  <p><strong>Outstanding for the final build:</strong> a dedicated profiling pass over USB, a draw-call reduction pass (terrain Draw-Instanced plus tree GPU instancing), a texture-compression (ASTC) audit, and the on-device APK verified at 72/90 FPS. Gameplay is verified in-headset on a Quest 3, but a sustained measured frame rate is not yet claimed.</p>
+</section>
+
+<section id="s9">
+  <h2><span class="n">09</span> Known limitations and future work</h2>
+  <ul>
+    <li><strong>Tripod slope leg-levelling</strong> was prototyped (cluster the three legs by azimuth, splay each about its hip hinge onto the terrain) but the clustering and solver mis-grouped parts and it was reverted; legs currently float or clip slightly on steep slopes (cosmetic). A safer redesign would scale only the lower leg segment along its own axis.</li>
+    <li><strong>Top-down map picture-in-picture</strong> was scoped and deferred, since it would need a second render pass (a Quest cost).</li>
+    <li><strong>Hand and head culling in the feed</strong> (the player can appear in the photo) is a known follow-up via the same layer mechanism.</li>
+    <li><strong>On-device performance numbers</strong> are pending the final Android build.</li>
+  </ul>
+</section>
+
+<section id="s10">
+  <h2><span class="n">10</span> Conclusion</h2>
+  <p>Hanami Polaroid delivers a complete, comfortable, and thematically coherent VR photography loop on a standalone mobile headset. Its technical contribution is a disciplined camera-within-a-camera pipeline: mono render-to-texture, layer-isolated UI and depth of field, a unified physical-lens model, and a set of carefully root-caused fixes to VR-specific stereo and comfort problems. The architecture is component-based and asset-light, and the environment is budgeted from the ground up for the Quest GPU. With the gameplay loop verified in-headset, the project is one performance pass away from a shippable on-device build.</p>
+</section>
+
+<footer>
+  <span>Hanami Polaroid · Technical Report</span>
+  <span><a href="index.html">View the presentation →</a></span>
+</footer>
+
+</div>
+<script>
+  const p=document.getElementById('progress');
+  addEventListener('scroll',()=>{const h=document.documentElement;const sc=h.scrollTop/(h.scrollHeight-h.clientHeight);p.style.width=(sc*100)+'%';},{passive:true});
+</script>
+</body>
+</html>
