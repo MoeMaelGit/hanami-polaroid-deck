@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Hanami Polaroid — VR for Product Testing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sumi:#14161a; --sumi-2:#1b1e24; --washi:#ece6da; --washi-dim:#9a958c;
+    --sakura:#e8a0b4; --hud:#e0a96d; --matcha:#7f9b78; --line:#2c313a;
+    --serif:"Shippori Mincho","Yu Mincho",Georgia,serif;
+    --sans:"Inter",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--sumi);color:var(--washi);font-family:var(--sans);font-weight:300;
+    line-height:1.65;-webkit-font-smoothing:antialiased}
+  .progress{position:fixed;top:0;left:0;height:2px;background:var(--sakura);width:0;z-index:50}
+  .wrap{max-width:820px;margin:0 auto;padding:0 28px 120px}
+  header.top{padding:74px 0 30px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--sakura);margin-bottom:18px}
+  .jp{font-family:var(--serif);color:var(--sakura);font-size:20px;letter-spacing:.28em;font-weight:600;margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:800;font-size:clamp(38px,6.5vw,64px);line-height:1.04;letter-spacing:-.01em}
+  .sub{font-size:clamp(16px,2vw,19px);color:var(--washi-dim);margin-top:18px;max-width:60ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0 22px;font-family:var(--mono);font-size:12px;color:var(--washi-dim);
+    letter-spacing:.06em;margin-top:24px}
+  .meta span{padding-right:22px;border-right:1px solid var(--line)}
+  .meta span:last-child{border:0;padding-right:0}
+  .meta a{color:var(--sakura);text-decoration:none;border-bottom:1px solid rgba(232,160,180,.4)}
+  .meta a:hover{color:var(--washi)}
+  section{padding-top:52px;scroll-margin-top:20px}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3.4vw,34px);line-height:1.12;
+    margin-bottom:20px;display:flex;gap:16px;align-items:baseline}
+  h2 .n{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--hud);flex:0 0 auto}
+  h3{font-family:var(--serif);font-weight:600;font-size:20px;margin:28px 0 8px}
+  p{margin:0 0 16px;color:#d8d2c6}
+  strong{color:var(--washi);font-weight:600}
+  em{color:var(--washi)}
+  .accent{color:var(--sakura)}
+  .lead{font-size:18px;color:var(--washi)}
+  ul{list-style:none;margin:8px 0 18px}
+  ul li{position:relative;padding-left:22px;margin-bottom:11px;color:#d8d2c6}
+  ul li::before{content:"";position:absolute;left:0;top:10px;width:6px;height:6px;background:var(--sakura);transform:rotate(45deg)}
+  code{font-family:var(--mono);font-size:.86em;color:var(--hud);background:#0f1115;padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+  table{width:100%;border-collapse:collapse;margin:10px 0 22px;font-size:15px}
+  table td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:#d8d2c6}
+  table td:first-child{font-family:var(--mono);font-size:12.5px;color:var(--hud);letter-spacing:.04em;white-space:nowrap;width:210px}
+  table tr:last-child td{border-bottom:0}
+  .pull{background:var(--sumi-2);border:1px solid var(--line);border-left:3px solid var(--sakura);border-radius:8px;
+    padding:18px 22px;margin:6px 0 22px;font-size:16px;color:var(--washi)}
+  footer{margin-top:70px;padding-top:26px;border-top:1px solid var(--line);font-family:var(--mono);
+    font-size:12px;color:var(--washi-dim);letter-spacing:.06em;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  footer a{color:var(--sakura);text-decoration:none}
+  @media (max-width:620px){ table td:first-child{width:auto;display:block} h2{flex-direction:column;gap:4px} }
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+
+<header class="top">
+  <div class="kicker">VR for Product Testing</div>
+  <div class="jp">花見 ポラロイド</div>
+  <h1>Hanami Polaroid</h1>
+  <p class="sub">A case study in using virtual reality as a product-testing environment: evaluating a product through natural, realistic interaction in contexts and configurations that can be swapped in minutes.</p>
+  <div class="meta">
+    <span>XR Class &amp; Design · Carulli</span>
+    <span>A VR product-testing case study</span>
+    <span><a href="index.html">All materials →</a></span>
+  </div>
+</header>
+
+<section id="s1">
+  <h2><span class="n">01</span> Overview</h2>
+  <p class="lead">Hanami Polaroid began as an interactive VR experience: the user walks a Japanese garden, picks up a digital camera, frames shots through a live viewfinder, and takes pictures that eject as physical polaroids to be shaken and hung.</p>
+  <p>Read a second way, it is a working demonstration of something more general: <strong>a virtual-reality environment can serve as a testbed for products</strong>. The "product" here is a camera, and in VR you handle it the way you would in reality, change its settings, and see faithful results, all inside a scene you can completely replace. This report sets out why that matters for product testing and which parts of the project already demonstrate it.</p>
+  <div class="pull">The core idea: <strong>natural interaction</strong> + <strong>faithful simulation of the product</strong> + <strong>swappable context and swappable product</strong> = a place to evaluate how a product feels and performs before any physical prototype exists.</div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span> VR as a product-testing environment</h2>
+  <p>Testing a physical product traditionally needs physical prototypes, real test locations, and time. Each variant, and each scenario you want to try it in, costs more of all three. A virtual environment changes that economics:</p>
+  <ul>
+    <li><strong>Test before you build.</strong> A product can be handled, operated, and judged while it is still a 3D model and a set of parameters.</li>
+    <li><strong>Change the scenario instantly.</strong> The same product can be tried in many places, lighting conditions, and situations without travelling or rebuilding sets.</li>
+    <li><strong>Compare variants side by side.</strong> Swapping one model for another is a configuration change, so testers can compare candidates under identical conditions.</li>
+    <li><strong>Safe, repeatable, observable.</strong> Every session runs under the same controlled conditions and can be repeated exactly.</li>
+  </ul>
+  <p>Hanami Polaroid is a concrete, working instance of this idea, built around a camera.</p>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span> Natural, realistic interaction</h2>
+  <p>For a VR test to tell you anything true about a product, the interaction has to feel like the real thing. This is where the project is strongest.</p>
+
+  <h3>You handle the product the way you would in reality</h3>
+  <p>The camera is picked up by <strong>reaching out and grabbing it with your hand</strong>, not by pointing a laser and clicking. Far-pointer grabbing is explicitly rejected. The result is that holding, raising, and aiming the camera mirror the real gesture, so what a tester learns about handling it carries over.</p>
+
+  <h3>The product behaves like the real product</h3>
+  <p>The camera is not a prop with a fake screen. It is a <strong>physically simulated instrument</strong>: zoom, focus, aperture, and depth of field are computed as a real lens, and they genuinely shape the image you capture. Open the aperture and the background softens; rack focus and the subject sharpens; zoom in and the framing and the depth of field change together, because the optics are driven by one consistent lens model rather than separate cosmetic effects.</p>
+  <div class="pull">Because the settings produce a faithful result, a tester can answer "what would a photograph from <em>this</em> camera, at <em>these</em> settings, actually look like?" without owning the camera.</div>
+
+  <h3>The output is a real, handleable object</h3>
+  <p>A captured photo ejects as a <strong>physical polaroid</strong> that falls, can be picked up, shaken to develop, and hung on a line. It obeys gravity and collides with the world like the real thing. The artefact of the product, the photograph, is itself something the tester holds and inspects, closing the loop between operating the product and judging its result.</p>
+
+  <h3>It is comfortable to use</h3>
+  <p>Comfort was treated as a requirement, not a finishing touch: there is no nausea-inducing motion, the framed-image effects never touch the player's own eyes, and turning and movement are tuned to stay easy. A tester can concentrate on the product instead of fighting the medium, which is what makes the feedback trustworthy.</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span> Configurable test scenarios</h2>
+  <p>The reason this generalises into a testing tool is that almost everything around the product is interchangeable.</p>
+
+  <h3>Swap the environment</h3>
+  <p>The scene is built so the <strong>setting can be replaced</strong>. The garden is one context; the same product could be tested in a city street, an interior, a studio, a dim room, or a bright exterior. Changing the world changes the lighting, the subjects, and the feel, so the same camera can be evaluated across many situations and locations quickly, rather than building a new test for each.</p>
+
+  <h3>Swap the product — a camera library</h3>
+  <p>The camera's behaviour is driven by general, model-agnostic logic and bound to the model by its components, so a <strong>different camera can be dropped in</strong> and operated by the same mechanisms. That makes a <strong>library of cameras</strong> possible: several models, each tested and compared under identical conditions, to see how each would behave and what kind of images each would produce.</p>
+
+  <h3>Parameterise the product</h3>
+  <p>The lens characteristics, focal range, aperture range, and sensor, are values rather than hard-coded behaviour, so a <strong>specific real product can be reproduced</strong> by entering its specifications and then evaluated in VR. The same applies to how the photographs come out, which follows directly from those parameters.</p>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span> What can be evaluated</h2>
+  <table>
+    <tr><td>HANDLING</td><td>Does the product feel natural to hold and operate? Are the controls reachable and intuitive in the user's hands?</td></tr>
+    <tr><td>OUTPUT QUALITY</td><td>What does the product actually produce across its settings (here, how photographs look at different zoom, focus, and aperture)?</td></tr>
+    <tr><td>VARIANT COMPARISON</td><td>Put two or more models in front of the same user under identical conditions and compare preference and performance.</td></tr>
+    <tr><td>SCENARIO FIT</td><td>How does the same product perform across different environments, lighting, and use situations?</td></tr>
+    <tr><td>USER BEHAVIOUR</td><td>How do people approach, hold, and use the product when it behaves realistically?</td></tr>
+  </table>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span> Why it generalises beyond a camera</h2>
+  <p>Nothing about the approach is specific to cameras. The pattern, <strong>natural hand interaction</strong>, a <strong>faithfully simulated product</strong>, and <strong>swappable context and product</strong>, applies to many handheld or operated products where how something feels to use and what it produces both matter.</p>
+  <p>This is practical because the project is built in a <strong>modular, lightweight way</strong>: the interaction behaviours, the product, and the environment are separate, interchangeable pieces rather than one fixed scene. Adding a new product, a new environment, or a new interaction is an extension, not a rebuild, which is what keeps the cost of standing up a new test low.</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">07</span> Toward a product-testing platform</h2>
+  <p>As a research direction, a small number of additions would turn this case study into a general testing tool:</p>
+  <ul>
+    <li><strong>Measurement and capture.</strong> Record what the tester does, the settings they choose, the images they produce, and timing, so sessions yield data, not just impressions.</li>
+    <li><strong>A product and environment catalogue.</strong> Curated libraries of products and contexts that can be combined on demand for a given test.</li>
+    <li><strong>Validation against reality.</strong> Compare VR-test outcomes with real-world testing of the same products to calibrate how well the virtual results predict the physical ones.</li>
+    <li><strong>Multi-user and guided sessions.</strong> Structured tasks and the ability to run many testers through the same protocol.</li>
+  </ul>
+</section>
+
+<section id="s8">
+  <h2><span class="n">08</span> Conclusion</h2>
+  <p>Hanami Polaroid shows, in a working form, the ingredients a VR product-testing environment needs: a product you handle naturally, that behaves and produces results faithfully, set inside a context and a product slot you can swap at will. Used this way, virtual reality offers a fast, low-cost, repeatable place to evaluate how a product feels and performs, across many scenarios and many variants, well before a physical prototype is made.</p>
+</section>
+
+<footer>
+  <span>Hanami Polaroid · VR for Product Testing</span>
+  <span><a href="index.html">All materials →</a></span>
+</footer>
+
+</div>
+<script>
+  const p=document.getElementById('progress');
+  addEventListener('scroll',()=>{const h=document.documentElement;const sc=h.scrollTop/(h.scrollHeight-h.clientHeight);p.style.width=(sc*100)+'%';},{passive:true});
+</script>
+</body>
+</html>

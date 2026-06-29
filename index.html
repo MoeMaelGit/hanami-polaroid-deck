@@ -4,503 +4,88 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Hanami Polaroid — Technical Presentation</title>
+<title>Hanami Polaroid — Materials</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --sumi:#14161a;          /* ink ground */
-    --sumi-2:#1b1e24;        /* raised panel */
-    --washi:#ece6da;         /* paper text */
-    --washi-dim:#9a958c;     /* muted text */
-    --sakura:#e8a0b4;        /* emotional accent */
-    --sakura-deep:#c9748b;
-    --hud:#e0a96d;           /* camera readout amber */
-    --matcha:#7f9b78;        /* secondary, garden */
-    --line:#2c313a;          /* hairlines */
-    --ok:#86c98c;
-    --warn:#e0a96d;
-    --serif:"Shippori Mincho", "Yu Mincho", Georgia, serif;
-    --sans:"Inter", system-ui, -apple-system, sans-serif;
-    --mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+    --sumi:#14161a;--sumi-2:#1b1e24;--washi:#ece6da;--washi-dim:#9a958c;--sakura:#e8a0b4;
+    --hud:#e0a96d;--line:#2c313a;
+    --serif:"Shippori Mincho","Yu Mincho",Georgia,serif;
+    --sans:"Inter",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%}
-  body{
-    background:var(--sumi);
-    color:var(--washi);
-    font-family:var(--sans);
-    overflow:hidden;
-    -webkit-font-smoothing:antialiased;
-  }
-
-  /* ---------- viewfinder frame (the signature) ---------- */
-  .stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-  .vignette{position:fixed;inset:0;pointer-events:none;z-index:40;
-    background:radial-gradient(120% 120% at 50% 45%, transparent 55%, rgba(0,0,0,.55) 100%);}
-  .frame-ui{position:fixed;inset:0;pointer-events:none;z-index:45}
-  .bracket{position:absolute;width:38px;height:38px;border:2px solid rgba(236,230,218,.42)}
-  .bracket.tl{top:28px;left:28px;border-right:0;border-bottom:0}
-  .bracket.tr{top:28px;right:28px;border-left:0;border-bottom:0}
-  .bracket.bl{bottom:28px;left:28px;border-right:0;border-top:0}
-  .bracket.br{bottom:28px;right:28px;border-left:0;border-top:0}
-  .rec{position:absolute;top:34px;left:92px;font-family:var(--mono);font-size:12px;letter-spacing:.18em;
-    color:var(--washi-dim);display:flex;align-items:center;gap:8px}
-  .rec .dot{width:9px;height:9px;border-radius:50%;background:var(--sakura);box-shadow:0 0 10px var(--sakura);
-    animation:blink 2.4s steps(1) infinite}
-  @keyframes blink{0%,60%{opacity:1}61%,100%{opacity:.25}}
-  .reticle{position:absolute;top:50%;left:50%;width:120px;height:120px;transform:translate(-50%,-50%);
-    opacity:.06;display:none}
-  .reticle::before,.reticle::after{content:"";position:absolute;background:var(--washi)}
-  .reticle::before{top:50%;left:0;width:100%;height:1px}
-  .reticle::after{left:50%;top:0;height:100%;width:1px}
-  body.section-mode .reticle{display:block}
-
-  .readout{position:absolute;bottom:34px;left:92px;right:92px;display:flex;justify-content:space-between;
-    font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--hud)}
-  .readout .seg{display:flex;gap:22px}
-  .readout .muted{color:var(--washi-dim)}
-
-  /* ---------- slides ---------- */
-  .slide{position:absolute;width:min(1180px,92vw);max-height:84vh;opacity:0;visibility:hidden;
-    transform:scale(1.03);filter:blur(14px);transition:opacity .5s ease, transform .5s ease, filter .5s ease;
-    padding:10px 8px}
-  .slide.active{opacity:1;visibility:visible;transform:scale(1);filter:blur(0)}
-  .eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.32em;text-transform:uppercase;
-    color:var(--sakura);margin-bottom:20px}
-  h1{font-family:var(--serif);font-weight:800;font-size:clamp(40px,7vw,86px);line-height:1.02;letter-spacing:-.01em}
-  h2{font-family:var(--serif);font-weight:700;font-size:clamp(30px,4.6vw,52px);line-height:1.06;margin-bottom:8px}
-  .lede{font-size:clamp(17px,2vw,22px);color:var(--washi);max-width:60ch;line-height:1.5;font-weight:300}
-  .dim{color:var(--washi-dim)}
-  p{line-height:1.55}
-  strong{color:var(--washi);font-weight:600}
-  .accent{color:var(--sakura)}
-  .hud-text{color:var(--hud)}
-
-  /* title */
-  .title-wrap{display:flex;flex-direction:column;gap:26px}
-  .title-wrap .jp{font-family:var(--serif);font-size:clamp(22px,3vw,30px);color:var(--sakura);letter-spacing:.3em;font-weight:600}
-  .title-meta{display:flex;gap:28px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;color:var(--washi-dim);
-    letter-spacing:.08em;margin-top:8px}
-  .title-meta span{padding-right:28px;border-right:1px solid var(--line)}
-  .title-meta span:last-child{border:0}
-
-  /* generic content grid */
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:42px;align-items:start;margin-top:26px}
-  .cols-3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:26px}
-  ul.clean{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:22px}
-  ul.clean li{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:baseline;font-size:17px;line-height:1.45}
-  ul.clean li::before{content:"";width:7px;height:7px;margin-top:7px;background:var(--sakura);
-    transform:rotate(45deg)} /* petal-diamond marker */
-  .card{background:var(--sumi-2);border:1px solid var(--line);border-radius:10px;padding:22px 22px}
-  .card h3{font-family:var(--serif);font-size:21px;font-weight:600;margin-bottom:8px}
-  .card p{font-size:15px;color:var(--washi-dim)}
-  .card code{font-family:var(--mono);color:var(--hud);font-size:13px}
-  .card .k{font-family:var(--mono);font-size:12px;color:var(--hud);letter-spacing:.1em;display:block;margin-bottom:10px}
-
-  /* spec table / data */
-  table.spec{width:100%;border-collapse:collapse;margin-top:22px;font-size:15.5px}
-  table.spec td{padding:11px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-  table.spec td:first-child{font-family:var(--mono);font-size:13px;color:var(--hud);letter-spacing:.06em;
-    white-space:nowrap;width:230px}
-  table.spec tr:last-child td{border-bottom:0}
-
-  .kv{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 40px;margin-top:24px}
-  .kv .row{display:flex;justify-content:space-between;gap:18px;padding-bottom:12px;border-bottom:1px solid var(--line)}
-  .kv .row .label{font-size:15px;color:var(--washi-dim)}
-  .kv .row .val{font-family:var(--mono);font-size:14px;color:var(--washi)}
-
-  /* the "bug" before/after blocks */
-  .fixrow{display:grid;grid-template-columns:1fr;gap:16px;margin-top:22px}
-  .fix{display:grid;grid-template-columns:34px 1fr;gap:16px;background:var(--sumi-2);border:1px solid var(--line);
-    border-left:3px solid var(--sakura);border-radius:8px;padding:16px 18px}
-  .fix .num{font-family:var(--mono);color:var(--sakura);font-size:14px;font-weight:600;padding-top:2px}
-  .fix h4{font-size:16px;font-weight:600;margin-bottom:5px}
-  .fix p{font-size:14px;color:var(--washi-dim);line-height:1.5}
-  .fix code{font-family:var(--mono);color:var(--hud);font-size:13px}
-
-  /* mono callout / formula */
-  .formula{font-family:var(--mono);background:#0f1115;border:1px solid var(--line);border-radius:8px;
-    padding:16px 20px;color:var(--hud);font-size:15px;margin-top:8px;letter-spacing:.02em;overflow-x:auto}
-  .tree{font-family:var(--mono);background:#0f1115;border:1px solid var(--line);border-radius:10px;
-    padding:22px 24px;font-size:13.5px;line-height:1.85;white-space:pre;color:var(--washi);overflow-x:auto}
-  .tree .accent{color:var(--sakura)}.tree .hud-text{color:var(--hud)}.tree .dim{color:var(--washi-dim)}
-  .note{font-family:var(--mono);font-size:12.5px;color:var(--washi-dim);margin-top:10px;letter-spacing:.03em}
-
-  /* media placeholder */
-  .media{margin-top:24px;border:1.5px dashed var(--line);border-radius:10px;background:
-    repeating-linear-gradient(45deg,#16191f,#16191f 12px,#181b22 12px,#181b22 24px);
-    aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;text-align:center;position:relative}
-  .media .tag{font-family:var(--mono);font-size:13px;color:var(--washi-dim);letter-spacing:.08em;max-width:70%}
-  .media .corner{position:absolute;width:20px;height:20px;border:2px solid var(--sakura);opacity:.7}
-  .media .corner.a{top:12px;left:12px;border-right:0;border-bottom:0}
-  .media .corner.b{bottom:12px;right:12px;border-left:0;border-top:0}
-
-  .stat{font-family:var(--serif);font-weight:800;font-size:clamp(34px,5vw,58px);color:var(--washi);line-height:1}
-  .stat .unit{font-family:var(--mono);font-size:14px;color:var(--hud);letter-spacing:.08em}
-  .statlabel{font-size:14px;color:var(--washi-dim);margin-top:8px}
-
-  .arrowflow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:26px;font-family:var(--mono);
-    font-size:13.5px;letter-spacing:.04em}
-  .arrowflow .node{background:var(--sumi-2);border:1px solid var(--line);border-radius:7px;padding:10px 14px;color:var(--washi)}
-  .arrowflow .node.key{border-color:var(--sakura-deep);color:var(--sakura)}
-  .arrowflow .arr{color:var(--hud)}
-
-  .future{display:grid;grid-template-columns:1fr 1fr;gap:14px 36px;margin-top:24px}
-  .future .item{display:grid;grid-template-columns:auto 1fr;gap:12px;font-size:15px;align-items:baseline}
-  .future .item::before{content:"○";color:var(--hud);font-family:var(--mono);font-size:12px}
-
-  /* speaker notes */
-  .notes{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0d0f13;border-top:1px solid var(--line);
-    padding:18px 56px;font-size:14px;color:var(--washi-dim);line-height:1.5;transform:translateY(101%);
-    transition:transform .3s ease;max-height:38vh;overflow:auto}
-  .notes.show{transform:translateY(0)}
-  .notes b{color:var(--sakura);font-family:var(--mono);font-size:12px;letter-spacing:.1em}
-
-  /* progress dots */
-  .dots{position:fixed;top:50%;right:20px;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:9px}
-  .dots button{width:7px;height:7px;border-radius:50%;border:0;background:#3a3f49;cursor:pointer;padding:0;transition:all .2s}
-  .dots button.on{background:var(--sakura);transform:scale(1.5)}
-
-  .help{position:fixed;bottom:13px;left:0;right:0;text-align:center;z-index:46;font-family:var(--mono);font-size:10.5px;
-    color:var(--washi-dim);letter-spacing:.18em;opacity:.45}
-
-  /* petals */
-  .petals{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-  .petal{position:absolute;top:-30px;width:14px;height:14px;background:var(--sakura);opacity:.16;
-    border-radius:14px 1px 14px 1px;animation:fall linear infinite}
-  @keyframes fall{0%{transform:translateY(-30px) rotate(0deg);opacity:0}
-    10%{opacity:.18}90%{opacity:.16}100%{transform:translateY(102vh) rotate(320deg);opacity:0}}
-
-  @media (prefers-reduced-motion: reduce){
-    .slide{transition:opacity .25s ease}.slide{filter:none!important;transform:none!important}
-    .petal,.rec .dot{animation:none!important;display:none}
-  }
-  @media (max-width:760px){
-    .cols,.cols-3,.kv,.future{grid-template-columns:1fr}
-    .bracket{width:28px;height:28px}
-  }
+  body{background:var(--sumi);color:var(--washi);font-family:var(--sans);font-weight:300;
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(120% 90% at 50% -10%, rgba(232,160,180,.06), transparent 60%)}
+  .wrap{max-width:940px;margin:0 auto;padding:84px 28px 80px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--sakura);margin-bottom:18px}
+  .jp{font-family:var(--serif);color:var(--sakura);font-size:22px;letter-spacing:.3em;font-weight:600;margin-bottom:14px}
+  h1{font-family:var(--serif);font-weight:800;font-size:clamp(40px,7vw,72px);line-height:1.02;letter-spacing:-.01em}
+  .sub{font-size:clamp(16px,2vw,19px);color:var(--washi-dim);margin-top:18px;max-width:58ch;line-height:1.55}
+  .group{margin-top:54px}
+  .group > .label{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--washi-dim);margin-bottom:18px;display:flex;align-items:center;gap:14px}
+  .group > .label::after{content:"";flex:1;height:1px;background:var(--line)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  a.card{display:block;text-decoration:none;background:var(--sumi-2);border:1px solid var(--line);border-radius:12px;
+    padding:26px 26px 24px;transition:border-color .2s,transform .2s,background .2s;position:relative;overflow:hidden}
+  a.card:hover{border-color:var(--sakura);transform:translateY(-3px);background:#1f232a}
+  a.card .tag{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--hud)}
+  a.card h2{font-family:var(--serif);font-weight:700;font-size:26px;margin:12px 0 8px;color:var(--washi);line-height:1.1}
+  a.card p{font-size:14.5px;color:var(--washi-dim);line-height:1.5}
+  a.card .go{font-family:var(--mono);font-size:12px;color:var(--sakura);margin-top:16px;letter-spacing:.08em}
+  .featured a.card{border-left:3px solid var(--sakura)}
+  footer{margin-top:60px;font-family:var(--mono);font-size:12px;color:var(--washi-dim);letter-spacing:.06em;
+    border-top:1px solid var(--line);padding-top:24px}
+  @media (max-width:680px){ .grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <div class="kicker">Project Materials</div>
+  <div class="jp">花見 ポラロイド</div>
+  <h1>Hanami Polaroid</h1>
+  <p class="sub">A VR photography experience and a case study in using virtual reality for product testing. Everything below is one click away.</p>
 
-<div class="petals" id="petals"></div>
-<div class="stage" id="stage"><!-- slides injected/positioned here --></div>
-<div class="vignette"></div>
-
-<div class="frame-ui">
-  <div class="bracket tl"></div><div class="bracket tr"></div>
-  <div class="bracket bl"></div><div class="bracket br"></div>
-  <div class="rec"><span class="dot"></span> HANAMI · REC</div>
-  <div class="reticle"></div>
-  <div class="readout">
-    <div class="seg"><span id="r-mode" class="muted">MANUAL</span><span id="r-lens">35mm</span><span id="r-fstop">f/2.8</span></div>
-    <div class="seg"><span class="muted">FRAME</span><span id="r-frame">01 / 16</span></div>
+  <div class="group featured">
+    <div class="label">VR for Product Testing</div>
+    <div class="grid">
+      <a class="card" href="product-testing-report.html">
+        <div class="tag">Report</div>
+        <h2>Product-Testing Report</h2>
+        <p>How the project works as a VR product-testing environment: natural interaction, faithful product simulation, and swappable scenarios and products.</p>
+        <div class="go">Read →</div>
+      </a>
+      <a class="card" href="product-testing-deck.html">
+        <div class="tag">Presentation</div>
+        <h2>Product-Testing Presentation</h2>
+        <p>The same argument as a slide deck: VR as a fast, low-cost, repeatable place to test how a product feels and performs.</p>
+        <div class="go">Open →</div>
+      </a>
+    </div>
   </div>
+
+  <div class="group">
+    <div class="label">Technical</div>
+    <div class="grid">
+      <a class="card" href="report.html">
+        <div class="tag">Report</div>
+        <h2>Technical Report</h2>
+        <p>The engineering account: the camera-within-a-camera pipeline, the lens model, the VR-specific rendering and comfort work.</p>
+        <div class="go">Read →</div>
+      </a>
+      <a class="card" href="technical-deck.html">
+        <div class="tag">Presentation</div>
+        <h2>Technical Presentation</h2>
+        <p>The technical talk: architecture, the simulated lens, depth of field, and the bugs that only show up in stereo VR.</p>
+        <div class="go">Open →</div>
+      </a>
+    </div>
+  </div>
+
+  <footer>Hanami Polaroid · XR Class &amp; Design · Carulli</footer>
 </div>
-
-<div class="dots" id="dots"></div>
-<div class="help">← → NAV · N NOTES · F FULLSCREEN</div>
-<div class="notes" id="notes"></div>
-
-<!-- ===================== SLIDES ===================== -->
-<div id="deck" hidden>
-
-<!-- 1 TITLE -->
-<section class="slide section" data-lens="35mm" data-fstop="f/1.8" data-mode="HANAMI"
-  data-notes="Open warm and human. 'This is Hanami Polaroid — a VR experience about slowing down and taking photographs in a Japanese garden during cherry-blossom season. But the real work wasn't the garden — it was building a camera that behaves like a real camera, comfortably, in stereo VR, on a standalone Quest. That's what this talk is about.'">
-  <div class="title-wrap">
-    <div class="jp">花見 ポラロイド</div>
-    <h1>Hanami Polaroid</h1>
-    <p class="lede">A standalone VR photography experience for Meta&nbsp;Quest. Walk a Japanese garden in bloom, shoot through a living viewfinder, and develop polaroids you hang on the line.</p>
-    <div class="title-meta">
-      <span>XR Class &amp; Design · Carulli</span>
-      <span>Unity 6 · URP · OpenXR</span>
-      <span>Meta Quest 2 / 3</span>
-    </div>
-  </div>
-</section>
-
-<!-- 2 CONCEPT -->
-<section class="slide" data-lens="50mm" data-fstop="f/2.0" data-mode="MANUAL"
-  data-notes="Ground the design intent. Hanami is about slow appreciation, so the loop rewards looking and framing, not speed. Three pillars: a camera that feels real (diegetic controls), tangible artefacts (physical polaroids), and comfort as a hard requirement.">
-  <div class="eyebrow">Concept</div>
-  <h2>Photography <span class="accent">is</span> the gameplay</h2>
-  <p class="lede dim">Hanami (花見) is the contemplative ritual of watching the cherry blossoms. The whole loop is built to reward looking and framing rather than speed.</p>
-  <div class="cols-3">
-    <div class="card"><span class="k">PILLAR 01</span><h3>A real camera</h3><p>Diegetic controls, not an abstract UI overlay: a viewfinder you look <em>through</em>, with physical zoom, focus, and aperture.</p></div>
-    <div class="card"><span class="k">PILLAR 02</span><h3>Tangible photos</h3><p>Shots eject as physical polaroids you shake to develop and hang. Each one becomes a spatial memory.</p></div>
-    <div class="card"><span class="k">PILLAR 03</span><h3>Comfort first</h3><p>No nausea, no stereo conflicts, no unwanted motion. Treated as a hard requirement, not polish.</p></div>
-  </div>
-</section>
-
-<!-- 3 CORE LOOP -->
-<section class="slide section" data-lens="24mm" data-fstop="f/4.0" data-mode="LOOP"
-  data-notes="Walk them through the loop once, quickly, so the demo makes sense. Tutorial onboards to the first hung photo, then opens free-roam across six rings.">
-  <div class="eyebrow">The experience</div>
-  <h2>One loop, guided then free</h2>
-  <div class="arrowflow">
-    <span class="node">Grab camera</span><span class="arr">→</span>
-    <span class="node">Stand in a ring</span><span class="arr">→</span>
-    <span class="node">Spawn &amp; mount tripod</span><span class="arr">→</span>
-    <span class="node key">Enter viewfinder (B)</span><span class="arr">→</span>
-    <span class="node">Aim · zoom · focus</span><span class="arr">→</span>
-    <span class="node key">Shutter</span><span class="arr">→</span>
-    <span class="node">Polaroid ejects</span><span class="arr">→</span>
-    <span class="node">Shake to develop</span><span class="arr">→</span>
-    <span class="node">Hang on the line</span><span class="arr">→</span>
-    <span class="node">Roam to the next spot</span>
-  </div>
-  <ul class="clean" style="margin-top:34px">
-    <li><span></span><span>A <strong>guided tutorial</strong> reads live game state (so its prompts are always truthful) and walks you to your first developed, hung photo.</span></li>
-    <li><span></span><span>Then <strong>free-roam</strong> opens across <strong>six rings</strong> around the garden; tripods spawn facing the central scenery.</span></li>
-  </ul>
-</section>
-
-<!-- 4 ARCHITECTURE -->
-<section class="slide section" data-lens="28mm" data-fstop="f/8.0" data-mode="ARCH"
-  data-notes="The headline: component-based and event-driven, not a monolith. The core idea is a camera within a camera. Point at the layer-8 isolation note — it's the single trick that makes the whole thing work.">
-  <div class="eyebrow">System architecture</div>
-  <h2>A camera inside a camera</h2>
-  <div class="cols" style="grid-template-columns:1.15fr .85fr">
-    <div>
-      <div class="tree"><span class="hud-text">Player ▸ XR Origin rig</span>
-├─ <span class="accent">HanamiCamera</span> <span class="dim">(grabbable)</span>
-│   ├─ VirtualCamera ─▶ RT_Viewfinder
-│   ├─ on-body LCD <span class="dim">(samples the RT)</span>
-│   ├─ ViewfinderRenderer <span class="dim">(on while held)</span>
-│   └─ DirectGrabOnlyFilter
-├─ <span class="accent">TripodZoneController</span>
-│   ├─ ZoneRing × N <span class="dim">(terrain-conforming)</span>
-│   └─ HanamiTripod ▸ CameraMountPoint
-├─ <span class="accent">CameraViewController</span>
-│   └─ ViewfinderVolume <span class="dim">(DoF · layer 8)</span>
-├─ PolaroidPrinter ▸ Polaroid ▸ Develop
-├─ PhotoGallery · TutorialGuide
-└─ TeleportRayDisabler</div>
-    </div>
-    <div>
-      <ul class="clean">
-        <li><span></span><span><strong>Layer-8 isolation</strong> (<span class="hud-text">ViewfinderUI</span>): every surface that shows the feed is excluded from the secondary camera's culling mask.</span></li>
-        <li><span></span><span>One mechanism solves the <strong>infinite mirror</strong> and keeps UI out of photos.</span></li>
-        <li><span></span><span><strong>Asset-free artefacts</strong>: polaroids are generated entirely in code.</span></li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<!-- 7 CAMERA PIPELINE -->
-<section class="slide" data-lens="35mm" data-fstop="f/2.8" data-mode="RENDER"
-  data-notes="Explain the render path. The key VR-specific decision: render the framed view MONOSCOPICALLY into the texture — a photo is a flat image, not a stereo pair. Rendering it stereo into the RT is a subtle bug the tutorials gloss over.">
-  <div class="eyebrow">Pipeline</div>
-  <h2>From lens to LCD</h2>
-  <div class="arrowflow" style="margin-top:30px">
-    <span class="node key">VirtualCamera</span><span class="arr">mono render →</span>
-    <span class="node">RT_Viewfinder 1024×768</span><span class="arr">→</span>
-    <span class="node">world-space rear-LCD canvas</span><span class="arr">→</span>
-    <span class="node key">your eyes</span>
-  </div>
-  <div class="cols" style="margin-top:30px">
-    <ul class="clean">
-      <li><span></span><span>The framed view is rendered <strong>monoscopically</strong>, because a photograph is a flat image, not a stereo pair.</span></li>
-      <li><span></span><span>Shown on a <strong>rear-LCD canvas</strong>: bezel, live feed, and a readout of focal · f-stop · distance.</span></li>
-    </ul>
-    <ul class="clean">
-      <li><span></span><span>The canvas is <strong>un-mirrored at the root</strong> (negated X scale) so text and image read correctly while facing the eyes.</span></li>
-      <li><span></span><span>Secondary camera runs <strong>only while the camera is held</strong>, so there's no idle render cost.</span></li>
-    </ul>
-  </div>
-</section>
-
-<!-- 8 THE LENS -->
-<section class="slide" data-lens="115mm" data-fstop="f/1.8" data-mode="LENS"
-  data-notes="This is the most advanced slide — the unified physical lens. The point: zoom and depth-of-field are not two separate hand-tuned knobs. Focal length for the blur is DERIVED from the live field of view, so blur magnitude is physically correct at every zoom step.">
-  <div class="eyebrow">The simulated lens</div>
-  <h2>One physical lens, not four knobs</h2>
-  <div class="cols">
-    <div>
-      <table class="spec" style="margin-top:8px">
-        <tr><td>AIM</td><td>Left stick · re-asserted each frame, zero drift</td></tr>
-        <tr><td>ZOOM</td><td>FOV 60° → 12° &nbsp;<span class="dim">(≈ 21 to 115 mm · 24 mm full-frame)</span></td></tr>
-        <tr><td>FOCUS</td><td>Logarithmic 0.5 → 200 m</td></tr>
-        <tr><td>APERTURE</td><td>f/1.8 → f/22 (standard stops)</td></tr>
-        <tr><td>SHUTTER</td><td>Flash + synthesized click + haptic</td></tr>
-      </table>
-    </div>
-    <div>
-      <p class="dim" style="font-size:15px;margin-top:8px">Focal length for the Bokeh blur is <strong>derived from the live FOV</strong>, so zoom and depth-of-field are one consistent lens, and the blur stays physically correct at every step.</p>
-      <div class="formula">f = sensorHeight / (2 · tan(FOV / 2))</div>
-      <p class="note">Right-stick zoom (Y) and focus (X) use dominant-axis gating, so a diagonal push never cross-talks.</p>
-    </div>
-  </div>
-</section>
-
-<!-- 9 DOF + FOCUS -->
-<section class="slide" data-lens="85mm" data-fstop="f/1.8" data-mode="FOCUS"
-  data-notes="Two ideas: the DoF model is Bokeh (blurs near AND far like a real lens), and the focus indicator is computed from the real hyperfocal math — honest feedback. Capture is deliberately NOT gated on focus, so soft/artistic shots are allowed.">
-  <div class="eyebrow">Depth of field</div>
-  <h2>Honest optics, honest feedback</h2>
-  <div class="cols">
-    <ul class="clean">
-      <li><span></span><span><strong>URP Bokeh</strong> blurs near <em>and</em> far, like a real lens, and runs only on the viewfinder texture.</span></li>
-      <li><span></span><span>A <strong>red→green focus dot</strong> + centre reticle, computed from the physical depth of field.</span></li>
-      <li><span></span><span>Capture is <strong>not</strong> gated on focus, so deliberately soft shots are allowed.</span></li>
-    </ul>
-    <div>
-      <div class="formula">hyperfocal  H = f² / (N · c)</div>
-      <p class="note">N = f-number · c = circle of confusion (full-frame). Near/far sharp limits resolve around the focus distance; the band narrows as you zoom in.</p>
-    </div>
-  </div>
-</section>
-
-<!-- 10 VR BUGS I -->
-<section class="slide section" data-lens="50mm" data-fstop="f/4.0" data-mode="DEBUG"
-  data-notes="Tell each as a story. The single-pass-instanced one is the best: 'It looked perfect on my monitor, but in the headset the ring only showed in one eye and gave me a headache.' That lands.">
-  <div class="eyebrow">VR rendering · 1 of 2</div>
-  <h2>Bugs you only feel in stereo</h2>
-  <div class="fixrow">
-    <div class="fix"><div class="num">01</div><div><h4>The infinite mirror</h4><p>The feed showed the on-body LCD, which shows the feed → runaway recursion. <strong>Fix:</strong> a <code>ViewfinderUI</code> layer excluded from the secondary camera's culling mask, so it films the garden, not the screens.</p></div></div>
-    <div class="fix"><div class="num">02</div><div><h4>The one-eye ring (the "eye-strain" bug)</h4><p>The custom neon ring rendered in the <strong>left eye only</strong> → binocular rivalry, headaches. The hand-written shader was missing the <code>Single Pass Instanced</code> stereo macros. <strong>Fix:</strong> add the stereo macros → renders in both eyes.</p></div></div>
-  </div>
-</section>
-
-<!-- 11 VR BUGS II -->
-<section class="slide section" data-lens="50mm" data-fstop="f/4.0" data-mode="DEBUG"
-  data-notes="The DoF-on-the-eyes point is the comfort thesis of the whole project — say it plainly: blurring the player's actual vision is instant nausea, so DoF lives only on the texture.">
-  <div class="eyebrow">VR rendering · 2 of 2</div>
-  <h2>Comfort is a rendering decision</h2>
-  <div class="fixrow">
-    <div class="fix"><div class="num">03</div><div><h4>Depth of field, on the eyes</h4><p>Blurring the player's <em>actual vision</em> is instant nausea. <strong>Fix:</strong> the DoF volume lives on layer 8 and is sampled only by the secondary camera, while the eye camera has post off. The photo blurs; you never do.</p></div></div>
-    <div class="fix"><div class="num">04</div><div><h4>The teleport-ray leak</h4><p>The rig re-activates its teleport ray on right-stick-forward, the same stick used for zoom. <strong>Fix:</strong> re-assert the teleport interactors inactive <em>every frame before render</em>, so the ray can never draw.</p></div></div>
-    <div class="fix"><div class="num">05</div><div><h4>Aim drift</h4><p>Naive stick-aim accumulated float drift and slid the camera off its mount. <strong>Fix:</strong> re-derive the pose each frame from a captured pivot, <code>currentRot · Inverse(Euler(pitch,yaw,0))</code>, which keeps the clamp absolute.</p></div></div>
-  </div>
-</section>
-
-<!-- 12 POLAROID -->
-<section class="slide" data-lens="35mm" data-fstop="f/2.8" data-mode="PRINT"
-  data-notes="The tactile payoff. Cards are 100% procedural — no imported model. Two nice engineering details: ContinuousDynamic collision stops thin cards tunnelling through sloped terrain; development is driven by real shake (card acceleration).">
-  <div class="eyebrow">Artefacts</div>
-  <h2>A photo you can hold</h2>
-  <div class="cols">
-    <ul class="clean">
-      <li><span></span><span>On shutter, the render texture is read into a <strong>Texture2D</strong> and composited into a procedural 4:3 card, with no imported model.</span></li>
-      <li><span></span><span>Ejects horizontally + up-pop so it <strong>clears the tripod at any pitch</strong>.</span></li>
-    </ul>
-    <ul class="clean">
-      <li><span></span><span><strong>ContinuousDynamic</strong> collision stops thin cards tunnelling through sloped terrain.</span></li>
-      <li><span></span><span>Ejects blank, <strong>develops 0→1 by shaking</strong> (card acceleration) plus a passive timer. FIFO cap of 10; each card frees its own runtime texture.</span></li>
-    </ul>
-  </div>
-</section>
-
-<!-- 13 GALLERY + ENV -->
-<section class="slide" data-lens="24mm" data-fstop="f/8.0" data-mode="WORLD"
-  data-notes="Two systems on one slide. The clothesline uses true catenary curves and a HingeJoint so photos swivel gently. The environment is a heavily-budgeted vendor garden; the terrain populator is custom procedural work — mention the SmoothStep gotcha if asked.">
-  <div class="eyebrow">World</div>
-  <h2>Clothesline &amp; garden</h2>
-  <div class="cols">
-    <div class="card"><span class="k">PHOTO GALLERY</span><h3>Catenary clothesline</h3><p>True sag curves strung between the torii beams. Photos hang by their top-middle on a HingeJoint, so they keep gravity and swivel freely about Y. Left-trigger remote-stores a held photo; stored cards are exempt from the FIFO cull.</p></div>
-    <div class="card"><span class="k">ENVIRONMENT</span><h3>Borrowed scenery</h3><p>Vendor garden trimmed 7×7 → 3×3 (~180×180 m, ~9.5 m relief); ~25M grass instances removed. Distant scenery is a panoramic HDRI skybox plus ground skirt and fog (借景 <em>shakkei</em>), not geometry. A procedural populator blends the neighbour terrain with a three-term height formula, and a sneaky <span class="hud-text">Mathf.SmoothStep ≠ GLSL</span> bug there was fixed with a custom <code>Smooth01</code> helper.</p></div>
-  </div>
-</section>
-
-<!-- 14 PERFORMANCE -->
-<section class="slide section" data-lens="50mm" data-fstop="f/5.6" data-mode="PERF"
-  data-notes="Lead with the grass number — it's the most dramatic. Frame these as deliberate budget decisions for a tile GPU, not accidents.">
-  <div class="eyebrow">Performance</div>
-  <h2>Budgeted for the tile GPU</h2>
-  <div class="cols-3" style="margin-top:30px">
-    <div><div class="stat">25M <span class="unit">→ 0</span></div><div class="statlabel">grass detail instances removed, the single biggest win</div></div>
-    <div><div class="stat">49 <span class="unit">→ 9</span></div><div class="statlabel">terrain tiles · splat VRAM 98 → 18 MB</div></div>
-    <div><div class="stat">1 <span class="unit">RT</span></div><div class="statlabel">mono, eye-post-off secondary render at 1024×768</div></div>
-  </div>
-  <ul class="clean" style="margin-top:30px">
-    <li><span></span><span>HDRI skybox instead of distant geometry · WindZone disabled · cheap capsule tree colliders · Single Pass Instanced.</span></li>
-    <li><span></span><span><span class="hud-text">Pending:</span> USB profiling pass, draw-call reduction (terrain Draw-Instanced + tree GPU instancing), ASTC audit, on-device APK at 72/90 FPS.</span></li>
-  </ul>
-</section>
-
-<!-- 15 LIMITATIONS -->
-<section class="slide" data-lens="35mm" data-fstop="f/4.0" data-mode="NEXT"
-  data-notes="Be honest and specific — this reads as maturity. The tripod leg-levelling story is good: 'here's what I tried, why it broke, and the safer approach next time.'">
-  <div class="eyebrow">Honest limitations &amp; next steps</div>
-  <h2>What's left, and what broke</h2>
-  <div class="future">
-    <div class="item"><span>Tripod slope <strong>leg-levelling</strong>: prototyped (cluster legs by azimuth, splay each onto terrain) but the solver mis-grouped parts, so it was <strong>reverted</strong>. Safer redesign: scale only the lower leg segment.</span></div>
-    <div class="item"><span>Top-down <strong>map PiP</strong>: deferred, because a second render pass costs on Quest.</span></div>
-    <div class="item"><span><strong>Hand/head culling</strong> in the feed: a known follow-up via the same layer mechanism.</span></div>
-    <div class="item"><span>Final <strong>on-device performance numbers</strong>: pending the Android build.</span></div>
-  </div>
-</section>
-
-<!-- 15 CLOSE -->
-<section class="slide section" data-lens="50mm" data-fstop="f/1.8" data-mode="HANAMI"
-  data-notes="Land the one-sentence thesis and stop. Then take questions. Have ready answers for: 'how did you keep it comfortable?', 'hardest bug?', 'how does it perform on Quest?'">
-  <div class="title-wrap">
-    <div class="jp">ありがとうございました</div>
-    <h2 style="font-size:clamp(30px,5vw,58px)">A disciplined camera,<br>budgeted for the Quest.</h2>
-    <p class="lede dim">Mono render-to-texture · layer-isolated UI &amp; depth-of-field · one unified physical lens · root-caused stereo &amp; comfort fixes. One performance pass from a shippable build.</p>
-    <div class="title-meta"><span>Thank you</span><span>Questions?</span><span class="hud-text">Hanami Polaroid</span></div>
-  </div>
-</section>
-
-</div>
-<!-- =================== /SLIDES =================== -->
-
-<script>
-(function(){
-  const deck = document.getElementById('deck');
-  const slides = Array.from(deck.querySelectorAll('.slide'));
-  const stage = document.getElementById('stage');
-  slides.forEach(s=>stage.appendChild(s));
-  const total = slides.length;
-  let i = 0;
-
-  // readout + dots
-  const rFrame=document.getElementById('r-frame'), rLens=document.getElementById('r-lens'),
-        rFstop=document.getElementById('r-fstop'), rMode=document.getElementById('r-mode');
-  const notes=document.getElementById('notes');
-  const dotsWrap=document.getElementById('dots');
-  slides.forEach((s,idx)=>{const b=document.createElement('button');b.onclick=()=>go(idx);dotsWrap.appendChild(b);});
-  const dots=Array.from(dotsWrap.children);
-
-  function pad(n){return String(n+1).padStart(2,'0');}
-  function render(){
-    slides.forEach((s,idx)=>s.classList.toggle('active', idx===i));
-    dots.forEach((d,idx)=>d.classList.toggle('on', idx===i));
-    const s=slides[i];
-    document.body.classList.toggle('section-mode', s.classList.contains('section'));
-    rFrame.textContent = pad(i)+' / '+String(total).padStart(2,'0');
-    rLens.textContent = s.dataset.lens||'35mm';
-    rFstop.textContent = s.dataset.fstop||'f/2.8';
-    rMode.textContent = s.dataset.mode||'MANUAL';
-    notes.innerHTML = '<b>NOTES · FRAME '+pad(i)+'</b><br>'+(s.dataset.notes||'—');
-  }
-  function go(n){ i=Math.max(0,Math.min(total-1,n)); render(); }
-  function next(){ go(i+1); } function prev(){ go(i-1); }
-
-  document.addEventListener('keydown',e=>{
-    if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();next();}
-    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
-    else if(e.key==='Home'){go(0);} else if(e.key==='End'){go(total-1);}
-    else if(e.key.toLowerCase()==='n'){notes.classList.toggle('show');}
-    else if(e.key.toLowerCase()==='f'){ if(!document.fullscreenElement)document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
-  });
-  // click right/left half to navigate
-  stage.addEventListener('click',e=>{ (e.clientX > window.innerWidth/2) ? next() : prev(); });
-
-  // petals
-  const pc=document.getElementById('petals');
-  for(let p=0;p<7;p++){const el=document.createElement('div');el.className='petal';
-    el.style.left=(Math.random()*100)+'%';
-    el.style.animationDuration=(9+Math.random()*8)+'s';
-    el.style.animationDelay=(-Math.random()*12)+'s';
-    el.style.transform='scale('+(0.6+Math.random()*0.8)+')';
-    pc.appendChild(el);}
-
-  render();
-})();
-</script>
 </body>
 </html>
