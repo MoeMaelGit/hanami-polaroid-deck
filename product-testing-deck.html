@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Hanami Polaroid — VR for Product Testing</title>
+<title>Hanami Polaroid · VR for Product Testing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -115,7 +115,7 @@
 </section>
 
 <!-- 2 THESIS -->
-<section class="slide section" data-lens="idea" data-fstop="—" data-mode="THESIS"
+<section class="slide section" data-lens="idea" data-fstop="auto" data-mode="THESIS"
   data-notes="State the equation plainly. Natural interaction + faithful product + swappable context/product = a place to evaluate a product before a physical prototype exists.">
   <div class="eyebrow">The idea</div>
   <h2>VR as a product-testing environment</h2>
@@ -130,7 +130,7 @@
 </section>
 
 <!-- 3 WHY -->
-<section class="slide" data-lens="value" data-fstop="—" data-mode="WHY"
+<section class="slide" data-lens="value" data-fstop="auto" data-mode="WHY"
   data-notes="The economics. Physical testing needs prototypes, locations, and time; each variant and scenario multiplies the cost. VR changes that.">
   <div class="eyebrow">Why VR for testing</div>
   <h2>Test before you build</h2>
@@ -208,7 +208,7 @@
 </section>
 
 <!-- 9 EVALUATE -->
-<section class="slide" data-lens="metrics" data-fstop="—" data-mode="EVALUATE"
+<section class="slide" data-lens="metrics" data-fstop="auto" data-mode="EVALUATE"
   data-notes="What a test like this yields. Walk the rows quickly; note that measurement/telemetry is a natural next step.">
   <div class="eyebrow">Evaluate</div>
   <h2>What you can measure</h2>
@@ -222,7 +222,7 @@
 </section>
 
 <!-- 10 GENERALIZE + ROADMAP -->
-<section class="slide section" data-lens="beyond" data-fstop="—" data-mode="SCALE"
+<section class="slide section" data-lens="beyond" data-fstop="auto" data-mode="SCALE"
   data-notes="It is not camera-specific. The pattern applies to many handheld/operated products, and the modular build keeps the cost of a new test low. Then the roadmap to a real platform.">
   <div class="eyebrow">Beyond the camera</div>
   <h2>It generalises, and where it goes next</h2>
@@ -273,7 +273,7 @@
     const s=slides[i];document.body.classList.toggle('section-mode',s.classList.contains('section'));
     rFrame.textContent=pad(i)+' / '+String(total).padStart(2,'0');
     rLens.textContent=s.dataset.lens||'VR';rFstop.textContent=s.dataset.fstop||'product';rMode.textContent=s.dataset.mode||'TESTBED';
-    notes.innerHTML='<b>NOTES · FRAME '+pad(i)+'</b><br>'+(s.dataset.notes||'—');
+    notes.innerHTML='<b>NOTES · FRAME '+pad(i)+'</b><br>'+(s.dataset.notes||'');
   }
   function go(n){i=Math.max(0,Math.min(total-1,n));render();}
   function next(){go(i+1);}function prev(){go(i-1);}

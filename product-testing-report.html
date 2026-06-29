@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex, nofollow" />
-<title>Hanami Polaroid — VR for Product Testing</title>
+<title>Hanami Polaroid · VR for Product Testing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -79,7 +79,7 @@
   <h2><span class="n">01</span> Overview</h2>
   <p class="lead">Hanami Polaroid began as an interactive VR experience: the user walks a Japanese garden, picks up a digital camera, frames shots through a live viewfinder, and takes pictures that eject as physical polaroids to be shaken and hung.</p>
   <p>Read a second way, it is a working demonstration of something more general: <strong>a virtual-reality environment can serve as a testbed for products</strong>. The "product" here is a camera, and in VR you handle it the way you would in reality, change its settings, and see faithful results, all inside a scene you can completely replace. This report sets out why that matters for product testing and which parts of the project already demonstrate it.</p>
-  <div class="pull">The core idea: <strong>natural interaction</strong> + <strong>faithful simulation of the product</strong> + <strong>swappable context and swappable product</strong> = a place to evaluate how a product feels and performs before any physical prototype exists.</div>
+  <div class="pull">The core idea is simple. If you can interact with a product naturally, simulate it faithfully, and swap both the context and the product at will, you have a place to evaluate how it feels and performs before any physical prototype exists.</div>
 </section>
 
 <section id="s2">
@@ -119,7 +119,7 @@
   <h3>Swap the environment</h3>
   <p>The scene is built so the <strong>setting can be replaced</strong>. The garden is one context; the same product could be tested in a city street, an interior, a studio, a dim room, or a bright exterior. Changing the world changes the lighting, the subjects, and the feel, so the same camera can be evaluated across many situations and locations quickly, rather than building a new test for each.</p>
 
-  <h3>Swap the product — a camera library</h3>
+  <h3>Swap the product: a camera library</h3>
   <p>The camera's behaviour is driven by general, model-agnostic logic and bound to the model by its components, so a <strong>different camera can be dropped in</strong> and operated by the same mechanisms. That makes a <strong>library of cameras</strong> possible: several models, each tested and compared under identical conditions, to see how each would behave and what kind of images each would produce.</p>
 
   <h3>Parameterise the product</h3>
