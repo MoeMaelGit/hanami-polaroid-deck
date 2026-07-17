@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Hanami Polaroid · Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sumi:#14161a;--sumi-2:#1b1e24;--washi:#ece6da;--washi-dim:#9a958c;--sakura:#e8a0b4;
+    --hud:#e0a96d;--line:#2c313a;--focus:#7fdc8a;
+    --serif:"Shippori Mincho","Yu Mincho",Georgia,serif;
+    --sans:"Inter",system-ui,-apple-system,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--sumi);color:var(--washi);font-family:var(--sans);font-weight:300;
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(120% 90% at 50% -10%, rgba(232,160,180,.06), transparent 60%)}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 28px 90px}
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:52px}
+  .back{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--washi-dim);text-decoration:none;transition:color .2s}
+  .back:hover{color:var(--sakura)}
+  .top .jp{font-family:var(--serif);color:var(--sakura);font-size:17px;letter-spacing:.3em;font-weight:600}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--sakura);margin-bottom:16px}
+  h1{font-family:var(--serif);font-weight:800;font-size:clamp(38px,6.4vw,64px);line-height:1.03;letter-spacing:-.01em}
+  .lede{font-size:clamp(16px,2vw,19px);color:var(--washi-dim);margin-top:20px;max-width:64ch;line-height:1.62}
+  .note{font-family:var(--mono);font-size:11.5px;color:var(--washi-dim);letter-spacing:.05em;margin-top:18px;opacity:.85}
+
+  .group{margin-top:64px}
+  .group > .label{font-family:var(--mono);font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--washi-dim);margin-bottom:6px;display:flex;align-items:center;gap:14px}
+  .group > .label .num{color:var(--hud)}
+  .group > .label::after{content:"";flex:1;height:1px;background:var(--line)}
+  .group h2{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3vw,30px);color:var(--washi);margin:12px 0 10px;line-height:1.12}
+  .group .intro{font-size:15.5px;color:var(--washi-dim);line-height:1.6;max-width:70ch;margin-bottom:24px}
+  .group .intro b{color:var(--washi);font-weight:500}
+
+  .figs{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  figure{background:var(--sumi-2);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:border-color .2s}
+  figure:hover{border-color:#3a414d}
+  figure.wide{grid-column:1 / -1}
+  figure img{display:block;width:100%;height:auto;cursor:zoom-in;background:#0e1013}
+  figcaption{font-size:13.5px;color:var(--washi-dim);line-height:1.5;padding:13px 16px 15px}
+  figcaption .g{color:var(--focus);font-weight:500}
+  figcaption .r{color:var(--sakura);font-weight:500}
+  @media (max-width:720px){ .figs{grid-template-columns:1fr} .wrap{padding:32px 20px 70px} }
+
+  footer{margin-top:74px;font-family:var(--mono);font-size:12px;color:var(--washi-dim);letter-spacing:.06em;
+    border-top:1px solid var(--line);padding-top:24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  footer a{color:var(--sakura);text-decoration:none}
+
+  /* lightbox */
+  #lb{position:fixed;inset:0;background:rgba(8,9,11,.94);display:none;align-items:center;justify-content:center;
+    z-index:50;cursor:zoom-out;padding:28px}
+  #lb.on{display:flex}
+  #lb img{max-width:100%;max-height:100%;border-radius:6px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  #lb .cap{position:fixed;bottom:20px;left:0;right:0;text-align:center;font-family:var(--mono);
+    font-size:12px;color:var(--washi-dim);letter-spacing:.05em;padding:0 24px}
+  #lb .x{position:fixed;top:18px;right:24px;font-family:var(--mono);font-size:13px;color:var(--washi-dim);letter-spacing:.1em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="index.html">&larr; All materials</a>
+    <span class="jp">花見 ポラロイド</span>
+  </div>
+
+  <div class="kicker">Walkthrough</div>
+  <h1>The experience, frame by frame</h1>
+  <p class="lede">Hanami Polaroid puts a camera that exists only in simulation into your hands and lets you operate it under realistic optical and ergonomic conditions. This is the whole loop as it runs in the headset, and, read as a product-testing method, each step shows a dimension you can actually evaluate in VR: how the device <b>handles</b>, whether its <b>output looks right</b> at every setting, and whether the experience stays <b>comfortable</b>.</p>
+  <p class="note">Captured live in the running build via the XR Device Simulator (label visible bottom-left).</p>
+
+  <!-- 1 -->
+  <div class="group">
+    <div class="label"><span class="num">01</span> Natural handling</div>
+    <h2>You reach out and pick it up</h2>
+    <p class="intro">The camera is grabbed by <b>reaching for it with your hand</b>, not by pointing a far laser. Holding it, turning it, and bringing it up to frame are the same gestures you would make with a real device, which is exactly what you want to test when the question is how a product <b>feels</b> to hold and operate.</p>
+    <div class="figs">
+      <figure><img loading="lazy" src="img/01-garden-spawn.jpg" alt="The camera resting on the ground in the garden with a grab prompt"><figcaption>The camera waits on the ground in a cherry-blossom garden.</figcaption></figure>
+      <figure><img loading="lazy" src="img/02-grab-camera.jpg" alt="The camera held in hand with a live viewfinder on its back"><figcaption>Picked up by direct reach-grab. Its rear screen already shows a live feed.</figcaption></figure>
+      <figure class="wide"><img loading="lazy" src="img/03-handheld-view.jpg" alt="Holding the camera in both hands under a row of torii gates"><figcaption>Held freely, the live rear screen tracks wherever you point the body.</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="group">
+    <div class="label"><span class="num">02</span> Choosing a spot</div>
+    <h2>Glowing rings mark where to set up</h2>
+    <p class="intro">Soft, pulsing rings on the ground show valid spots to work from. Step into one and a <b>tripod is placed for you</b>, so framing happens from a stable, repeatable position. In a testing context this is what keeps different runs comparable: the same viewpoint every time.</p>
+    <div class="figs">
+      <figure><img loading="lazy" src="img/04-framing-ring.jpg" alt="A glowing ring on the ground beneath a torii gate"><figcaption>A framing ring under the first gate, with a step-in prompt.</figcaption></figure>
+      <figure><img loading="lazy" src="img/05-tripod-setup.jpg" alt="A tripod placed in the garden ready for the camera"><figcaption>Step in and the tripod appears, ready to receive the camera.</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="group">
+    <div class="label"><span class="num">03</span> Looking through it</div>
+    <h2>The world reframes in the viewfinder</h2>
+    <p class="intro">Mount the camera and look through it: the view snaps into a <b>rear-LCD viewfinder</b> with a live readout of focal length, aperture and focus distance. Behind the scenes a second, monocular camera renders this frame into a texture. The effects you see next are applied only to that texture, <b>never to your own eyes</b>.</p>
+    <div class="figs">
+      <figure class="wide"><img loading="lazy" src="img/06-viewfinder.jpg" alt="The immersive rear-LCD viewfinder showing the framed garden with a readout"><figcaption>The viewfinder at 21mm. Bottom strip: focal length, aperture, focus distance, and a focus dot.</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="group">
+    <div class="label"><span class="num">04</span> The simulated lens</div>
+    <h2>One lens model, consistent blur at every setting</h2>
+    <p class="intro">This is the product under test. Zoom, focus, aperture and <b>depth-of-field blur all come from a single lens model</b>: the focal length implied by the live field of view drives the blur directly, so the optics behave the way a real lens would at each setting. The focus dot reads <span class="r">red</span> when the subject is outside the sharp band and <span class="g">green</span> when it is in focus, letting a tester judge whether output <b>looks right</b> without leaving VR.</p>
+    <div class="figs">
+      <figure><img loading="lazy" src="img/07-lens-blur-red.jpg" alt="Telephoto viewfinder with a heavily blurred subject and a red focus dot"><figcaption>114mm, focused close: the far subject falls out of focus, dot <span class="r">red</span>.</figcaption></figure>
+      <figure><img loading="lazy" src="img/08-lens-focus-green.jpg" alt="Same framing now sharp on the subject with a green focus dot"><figcaption>Same frame, focus racked onto the tree: subject sharp, background soft, dot <span class="g">green</span>.</figcaption></figure>
+      <figure class="wide"><img loading="lazy" src="img/09-zoom-far-focus.jpg" alt="Telephoto shot focused to infinity, background sharp"><figcaption>Focus pushed to infinity: the whole distant scene resolves. The blur tracks the physics, not a fixed preset.</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="group">
+    <div class="label"><span class="num">05</span> Capture</div>
+    <h2>Squeeze the trigger</h2>
+    <p class="intro">The shutter captures <b>exactly what you framed</b>, at the focal length, aperture and focus you set. What the viewfinder promised is what the print delivers.</p>
+    <div class="figs">
+      <figure><img loading="lazy" src="img/10-capture.jpg" alt="A small polaroid ejecting from the camera on its tripod"><figcaption>A print ejects from the camera the moment the shutter fires.</figcaption></figure>
+      <figure><img loading="lazy" src="img/11-capture-infocus.jpg" alt="Viewfinder showing a sharp capture and an ejected polaroid on the ground"><figcaption>107mm, <span class="g">in focus</span>: the captured card lands below the tripod.</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="group">
+    <div class="label"><span class="num">06</span> A physical print</div>
+    <h2>It develops in your hands</h2>
+    <p class="intro">The photo ejects <b>blank</b> and develops over time, or faster if you <b>shake it</b>. The output is a tangible object you can pick up, hold to the light, and inspect, which turns "did that setting work?" into something you can literally look at.</p>
+    <div class="figs">
+      <figure><img loading="lazy" src="img/12-polaroid-blank.jpg" alt="Freshly ejected blank white polaroids on the grass"><figcaption>Fresh prints start blank white.</figcaption></figure>
+      <figure><img loading="lazy" src="img/13-polaroid-develop.jpg" alt="A scatter of polaroids, some developed, some still developing"><figcaption>Shaking speeds the develop: images rise out of the white.</figcaption></figure>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="group">
+    <div class="label"><span class="num">07</span> The gallery wall</div>
+    <h2>Hang the results and compare</h2>
+    <p class="intro">Finished prints clip onto ropes strung between the torii gates. The loop closes from <b>operating the product to reviewing its output</b>, side by side, which is the shape of a real comparison test: shoot a set of variants under identical conditions, then line them up.</p>
+    <div class="figs">
+      <figure><img loading="lazy" src="img/14-hang-photo.jpg" alt="A developed photo hanging on a rope between torii gates"><figcaption>A print hung on the line between the gates.</figcaption></figure>
+      <figure><img loading="lazy" src="img/15-clothesline.jpg" alt="A full row of photos hanging along the clothesline in the garden"><figcaption>A full session's results, hung for review.</figcaption></figure>
+    </div>
+  </div>
+
+  <footer>
+    <span>Hanami Polaroid · XR Class &amp; Design · Carulli</span>
+    <a href="index.html">&larr; Back to all materials</a>
+  </footer>
+</div>
+
+<div id="lb"><span class="x">ESC / click to close</span><img alt=""><div class="cap"></div></div>
+<script>
+  (function(){
+    var lb=document.getElementById('lb'), lbImg=lb.querySelector('img'), cap=lb.querySelector('.cap');
+    document.querySelectorAll('.figs figure img').forEach(function(im){
+      im.addEventListener('click',function(){
+        lbImg.src=im.currentSrc||im.src;
+        var fc=im.parentElement.querySelector('figcaption');
+        cap.textContent=fc?fc.textContent:'';
+        lb.classList.add('on');
+      });
+    });
+    function close(){lb.classList.remove('on'); lbImg.src='';}
+    lb.addEventListener('click',close);
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') close(); });
+  })();
+</script>
+</body>
+</html>
